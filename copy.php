@@ -27,6 +27,9 @@ if($_POST['SKU']!='' & $_POST['store']!='' & $_POST['CATEGORIES']!=''){
 	$categories = explode(',' , $_POST['CATEGORIES']);
 	var_dump($categories);
 
+	$product = $soap->call($session_id, 'catalog_product.info', $_POST['SKU']);
+	var_dump($product);
+
 	if($_POST['store']=='1'){
 		$mage_2_url = 'http://ausger.dev:8888/de/api/soap/?wsdl'; 
 		$mage_2_user = 'ausgerdev'; 
@@ -39,7 +42,8 @@ if($_POST['SKU']!='' & $_POST['store']!='' & $_POST['CATEGORIES']!=''){
 	$soap_2 = new SoapClient( $mage_2_url );	
 	
 	$product = $soap->call($session_id, 'catalog_product.info', $_POST['SKU']);
-	//var_dump($product);
+	var_dump($product);
+
 	if($product['type']=="simple"){
 		//copy product
 		$session_id_2 = $soap_2->login( $mage_2_user, $mage_2_api_key );
@@ -54,11 +58,8 @@ if($_POST['SKU']!='' & $_POST['store']!='' & $_POST['CATEGORIES']!=''){
 		//$product['categories'] = array(3,7,88);
 		$product['categories'] = $categories;
 		$product['visibility']= '4';
-		$product['tax_class_id']= '1';
+		$product['tax_class_id']= '0';
 
-
-		//$result = $soap_2->call($session_id_2, 'cataloginventory_stock_item.list', $_POST['SKU']);
-		//var_dump($result);
 
 		$result = $soap_2->call($session_id_2, 'catalog_product.create', array($product['type'], $product['set'], $new_sku, $product));
 		var_dump($result);
@@ -66,7 +67,7 @@ if($_POST['SKU']!='' & $_POST['store']!='' & $_POST['CATEGORIES']!=''){
 		//copy options
 		$product_options = $soap->call($session_id, 'product_custom_option.list', $_POST['SKU']);
 		$product_options_data = array();
-		
+
 		foreach($product_options as $product_options_data){
 			$product_options_get_data = $soap->call($session_id, 'product_custom_option.info', $product_options_data['option_id']);
 				//FIX
@@ -94,14 +95,14 @@ if($_POST['SKU']!='' & $_POST['store']!='' & $_POST['CATEGORIES']!=''){
 				}
 			curl_close($curl);
 		}
-		
+
 		$stockItemData = array(
     		'qty' => '50',
-    		'is_in_stock ' => 1,
-    		'manage_stock ' => 1,
+    		'is_in_stock' => 1,
+    		'manage_stock' => 1,
     		'use_config_manage_stock' => 0,
     		'min_qty' => 2,
-    		'use_config_min_qty ' => 0,
+    		'use_config_min_qty' => 0,
     		'min_sale_qty' => 1,
     		'use_config_min_sale_qty' => 0,
     		'max_sale_qty' => 10,
